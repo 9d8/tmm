@@ -8,7 +8,7 @@ There is no official way to install this program as of now. You can install tmm 
 ```
 make
 ```
-and then moving the generated executable to `/user/bin`. You can also put the executable directly in the game directory and run it from there.
+and then moving the generated executable to `/usr/bin`. You can also put the executable directly in the game directory and run it from there.
 
 # Usage
 To initialize tmm for a single game, go to that game's data directory and run:
