@@ -93,7 +93,7 @@ int add_file_to_file_list(const char* fpath, const struct stat* sb, int typeflag
 	//fpath should be relative to game root, otherwise this doesnt work.
 	char* game_root_path = strchr(strchr(fpath, '/') + 1, '/') + 1;
 
-	file_list_buff->list[file_list_buff->len] = malloc(sizeof(char)*strlen(game_root_path));
+	file_list_buff->list[file_list_buff->len] = malloc(sizeof(char)*(strlen(game_root_path)+1));
 	strcpy(file_list_buff->list[file_list_buff->len++], game_root_path);
 
 	return 0;
