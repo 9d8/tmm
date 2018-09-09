@@ -31,7 +31,7 @@ struct item {
 typedef struct {
 	item** items;	
 	int table_size;
-	int filled_buckets;
+	int total_entries;
 } stringtable;
 
 stringtable* stringtable_initialize();

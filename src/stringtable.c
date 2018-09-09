@@ -31,7 +31,7 @@ stringtable* stringtable_initialize() {
 	stringtable* st = malloc(sizeof(stringtable));	
 	st->items = calloc(INITIAL_TABLE_SIZE, sizeof(item*));
 	st->table_size = INITIAL_TABLE_SIZE;
-	st->filled_buckets = 0;
+	st->total_entries = 0;
 	return st;
 }
 
@@ -55,7 +55,7 @@ stringtable* stringtable_read(const char* path) {
 	stringtable* st = malloc(sizeof(stringtable));	
 	
 	fread(&st->table_size, sizeof(int), 1, fp);
-	fread(&st->filled_buckets, sizeof(int), 1, fp);
+	fread(&st->total_entries, sizeof(int), 1, fp);
 	
 	st->items = calloc(st->table_size, sizeof(item*));
 
@@ -77,7 +77,7 @@ int stringtable_write(stringtable* st, const char* path) {
 	}
 	
 	fwrite(&st->table_size, sizeof(st->table_size), 1, fp);
-	fwrite(&st->filled_buckets, sizeof(st->filled_buckets), 1, fp);
+	fwrite(&st->total_entries, sizeof(st->total_entries), 1, fp);
 	
 	void write_string(item* it, void* fp);
 	stringtable_iterate(st, write_string, fp);
@@ -95,36 +95,32 @@ void write_string(item* it, void* fp) {
 
 int stringtable_add(stringtable* st, const char* string) {
 	int return_code = 0;
+	
+	st->total_entries++;
+	if(st->total_entries/0.75 > st->table_size) {
+		//resize and rehash
+		void resize_and_rehash(stringtable* st);
+		resize_and_rehash(st);
+	}
 
 	unsigned int string_hash = fnv1a_hash(string, strlen(string)) & st->table_size - 1;	
-	item* it = st->items[string_hash];
+	item** it = &st->items[string_hash];
 	
 //	printf("hash: %u\n", string_hash);
 
-	int exists;
+	int exists = 0;
 	
-	if(it == NULL) {
-		exists = 0;
-		st->filled_buckets++;
-		if(st->filled_buckets/0.75 > st->table_size) {
-			//resize and rehash
-			void resize_and_rehash(stringtable* st);
-			resize_and_rehash(st);
-		}
-	} else {
-		while((exists = it != NULL) && strcmp(it->string, string)) {
-			it = it->next;
-//			printf("exists %d\n", it != NULL);
-		}
+	while((exists = *it != NULL) && strcmp((*it)->string, string)) {
+		it = &(*it)->next;
 	}
 
 	if(!exists) {
-		it = malloc(sizeof(item));	
-		it->string = malloc(sizeof(char)*(strlen(string) + 1)); 
-		strcpy(it->string, string);
-		it->next = NULL;
+		item* new_item = malloc(sizeof(item));	
+		new_item->string = malloc(sizeof(char)*(strlen(string) + 1)); 
+		strcpy(new_item->string, string);
+		new_item->next = NULL;
 		
-		st->items[string_hash] = it;
+		*it = new_item;
 	} else {
 		return_code = 1;
 	} 
@@ -145,7 +141,7 @@ int stringtable_del(stringtable* st, const char* string) {
 	item* next = it->next;
 	free(it);
 	if(next == NULL) {
-		st->filled_buckets--;	
+		st->total_entries--;	
 		st->items[string_hash] = NULL;
 	} else {
 		st->items[string_hash] = next;
@@ -185,13 +181,22 @@ void resize_and_rehash(stringtable* st) {
 	stringtable* new_table = malloc(sizeof(stringtable));	
 	new_table->items = calloc(new_size, sizeof(item*));
 	new_table->table_size = new_size;
-	new_table->filled_buckets = 0;
+	new_table->total_entries = 0;
 	
 	void add_item(item* it, void* table);
 	stringtable_iterate(st, add_item, new_table);
 
-	stringtable_destroy(st);
-	st = new_table;
+	/* We want to set new_table to the old table so we can easily free all the 
+	 * old strings and stuff without having to destroy the original 
+	 * stringtable */
+	item** items_buff = new_table->items;
+	new_table->items = st->items;
+	new_table->table_size = st->table_size;
+
+	st->items = items_buff;
+	st->table_size = new_size;
+
+	stringtable_destroy(new_table);
 }
 
 void add_item(item* it, void* table) {
