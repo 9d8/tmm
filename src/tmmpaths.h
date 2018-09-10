@@ -18,8 +18,8 @@
 	https://github.com/9d8/tmm/
 */
 
-#ifndef SGMEPATHS_H_
-#define SGMEPATHS_H_
+#ifndef TMMPATHS_H_
+#define TMMPATHS_H_
 
 #define MOD_DIR "mods/"
 #define MODLIST_FILE_PATH "mods/mods.txt"

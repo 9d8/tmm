@@ -1,8 +1,4 @@
 build/
 
-mods/
-.smm
-bak/
-
 *.o
 *.swp
