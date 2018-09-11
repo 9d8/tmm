@@ -28,6 +28,8 @@
 #include "tmmpaths.h"
 #include "util.h"
 
+#define COMMENT_CHAR '/'
+
 void modlist_update() {
 	if(access(MOD_DIR, F_OK)) {
 		mkdir_r(MOD_DIR);
@@ -51,7 +53,9 @@ void modlist_update() {
 	stringtable* unaccounted_mods = stringtable_initialize(); 
 	struct dirent* dirfile;
 	while((dirfile = readdir(mod_dir)) != NULL) {
-		if(dirfile->d_type == DT_DIR && strcmp(dirfile->d_name, ".") && strcmp(dirfile->d_name, "..")) {
+		// We dont want to add the . and .. directories.
+		int is_valid_dir = strcmp(dirfile->d_name, ".") && strcmp(dirfile->d_name, "..");
+		if(dirfile->d_type == DT_DIR && is_valid_dir) {
 			stringtable_add(unaccounted_mods, dirfile->d_name);
 		}
 	}	
@@ -66,6 +70,12 @@ void modlist_update() {
 	char strbuf[NAME_MAX];
 	while(fgets(strbuf, NAME_MAX, modlist_file)) {
 		strbuf[strcspn(strbuf, "\n")] = 0;
+		
+		// Do not remove or write commented mods from mods.txt
+		if(strbuf[0] == COMMENT_CHAR) {
+			stringtable_del(unaccounted_mods, strbuf+1);
+			continue;
+		}
 		
 		int exists = stringtable_string_exists(unaccounted_mods, strbuf);
 		if(exists) {
@@ -100,6 +110,10 @@ void modlist_iterate(void (*mod_action)(mod* m)) {
 	char strbuf[NAME_MAX + mod_dir_len];
 	strcpy(strbuf, MOD_DIR);
 	while(fgets(strbuf + mod_dir_len, NAME_MAX, modlist_file)) {
+		if(strbuf[mod_dir_len] == COMMENT_CHAR) {
+			continue;
+		}
+
 		strbuf[strcspn(strbuf, "\n")] = 0;
 
 		mod* m;
