@@ -29,5 +29,4 @@ clean:
 	-rm $(BUILDDIR)/$(TARGET) $(OBJECTS)
 
 mkdir:
-	-mkdir $(BUILDDIR)
-
+	@-mkdir $(BUILDDIR) || true
