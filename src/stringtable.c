@@ -138,7 +138,12 @@ int stringtable_del(stringtable* st, const char* string) {
 		it = it->next;	
 	}
 
+	if(it == NULL) {
+		return 1;
+	}
+
 	item* next = it->next;
+	free(it->string);
 	free(it);
 	if(next == NULL) {
 		st->total_entries--;	
@@ -146,6 +151,8 @@ int stringtable_del(stringtable* st, const char* string) {
 	} else {
 		st->items[string_hash] = next;
 	}
+
+	return 0;
 }
 
 int stringtable_iterate(stringtable* st, void (*item_action)(item* it, void* param), void* param) {
