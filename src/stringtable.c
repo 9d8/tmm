@@ -25,7 +25,7 @@
 
 #define INITIAL_TABLE_SIZE 64
 
-unsigned int fnv1a_hash(const char* str, int len);
+static unsigned int fnv1a_hash(const char* str, int len);
 
 stringtable* stringtable_initialize() {
 	stringtable* st = malloc(sizeof(stringtable));	

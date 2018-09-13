@@ -27,7 +27,7 @@
 #include "util.h"
 #include "tmmpaths.h"
 
-stringtable* st;
+static stringtable* st;
 
 void installer_init() {
 	if(!access(PROGRAM_DATA, F_OK | W_OK | R_OK)) {

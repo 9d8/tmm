@@ -31,8 +31,6 @@ struct string_list {
 };
 static struct string_list* file_list_buff = NULL;
 
-int add_file_to_file_list(const char* fpath, const struct stat* sb, int typeflag);
-
 mod* mod_initialize(char* mod_path) {
 	mod* m = malloc(sizeof(mod));
 	
@@ -42,6 +40,7 @@ mod* mod_initialize(char* mod_path) {
 	strcpy(m->name, mod_name);
 	
 	// will return null if no files are found inside the mod.
+	int add_file_to_file_list(const char* fpath, const struct stat* sb, int typeflag);
 	if(ftw(mod_path, add_file_to_file_list, 15) || file_list_buff == NULL) {
 		//error
 		free(m->name);
