@@ -3,30 +3,31 @@ TARGET=tmm
 
 #Directories
 BUILDDIR=build
-INCLUDEDIR=src
+INCLUDEDIRS=src
 SRCDIR=src
 
 CFLAGS=
-LIB=
-INCLUDE=-I$(INCLUDEDIR)
+LIBS=
 
 ############################################
 
-OBJECTS:=$(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(wildcard src/*.c))
-DEPS:=$(patsubst $(INCLUDEDIR)/%.c,$(INCLUDEDIR)/%.o,$(wildcard src/*.h))
+OBJECTS=$(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(wildcard $(SRCDIR)/*.c))
+INCLUDE=$(patsubst %,-I%,$(INCLUDEDIRS))
+LIB=$(patsubst %,-L%,$(LIBS))
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS) $(INCLUDE)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $< $(INCLUDE) 
 
 $(TARGET): mkdir $(OBJECTS)
-	$(CC) -o $(BUILDDIR)/$@ $(OBJECTS) $(CFLAGS) $(INCLUDE) $(LIB)
+	$(CC) $(CFLAGS) -o $(BUILDDIR)/$@ $(OBJECTS) $(INCLUDE) $(LIB)
 
-debug: CFLAGS=-ggdb 
+.PHONY: debug clean mkdir
+
+debug: CFLAGS:=$(CFLAGS)-ggdb
 debug: $(TARGET)
 
-.PHONY: clean mkdir
 clean:
-	-rm $(BUILDDIR)/$(TARGET) $(OBJECTS)
+	-rm $(BUILDDIR)/$(TARGET) $(OBJECTS) 2>/dev/null
 
 mkdir:
 	@-mkdir $(BUILDDIR) || true
