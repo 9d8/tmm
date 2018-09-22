@@ -15,13 +15,21 @@ OBJECTS=$(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(wildcard $(SRCDIR)/*.c))
 INCLUDE=$(patsubst %,-I%,$(INCLUDEDIRS))
 LIB=$(patsubst %,-L%,$(LIBS))
 
+all: $(TARGET)
+
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $< $(INCLUDE) 
 
-$(TARGET): mkdir $(OBJECTS)
+# Make build directory when trying to create an object file.
+$(OBJECTS): | $(BUILDDIR)  
+
+$(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $(BUILDDIR)/$@ $(OBJECTS) $(INCLUDE) $(LIB)
 
-.PHONY: debug clean mkdir
+$(BUILDDIR):
+	mkdir $(BUILDDIR)
+
+.PHONY: debug clean install uninstall
 
 debug: CFLAGS:=$(CFLAGS)-ggdb
 debug: $(TARGET)
@@ -29,5 +37,8 @@ debug: $(TARGET)
 clean:
 	-rm $(BUILDDIR)/$(TARGET) $(OBJECTS) 2>/dev/null
 
-mkdir:
-	@-mkdir $(BUILDDIR) || true
+install: $(TARGET)
+	cp $(BUILDDIR)/$(TARGET) /usr/bin/
+
+uninstall:
+	rm /usr/bin/$(TARGET)
