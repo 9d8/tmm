@@ -4,7 +4,7 @@ Tiny Mod Manager (tmm) is a simple console based mod manager for Linux. It uses 
 This software is still in alpha. Due to potential bugs, by using this program, you may run the risk of corrupting your game directory.
 
 # Installation
-There build and install tmm, run:
+To build and install tmm, run:
 ```
 make install
 ```
