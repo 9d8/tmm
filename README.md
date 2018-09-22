@@ -27,7 +27,8 @@ Note that a mod's directory structure must match that of the game's data directo
 Tmm will automatically maintain a list of all installed mods in ```mods.txt```. It installs the mods from top down. In the event of a file conflict the lower listed mod will overwrite the upper listed mod. You can manually re-arrange this list to configure mod install order. Any invalid list entries will be deleted on the next run of tmm.
 
 ### Uninstalling a mod
-To uninstall a mod, move its directory out of the ```mods/``` and run 
+To uninstall a mod, move its directory out of the ```mods/``` and run:
 ```
 tmm
 ``` 
+A mod can also be uninstalled by prepending a ```/``` character to it's entry in mods.txt effectively "commenting it out".
