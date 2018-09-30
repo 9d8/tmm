@@ -28,6 +28,11 @@
 #include "tmmpaths.h"
 #include "util.h"
 
+#ifdef _WIN32
+#include <sys/stat.h>
+#define NAME_MAX PATH_MAX
+#endif
+
 #define COMMENT_CHAR '/'
 
 void modlist_update() {
@@ -51,12 +56,25 @@ void modlist_update() {
 	}
 
 	stringtable* unaccounted_mods = stringtable_initialize(); 
-	struct dirent* dirfile;
-	while((dirfile = readdir(mod_dir)) != NULL) {
+	struct dirent* dir_file;
+	while((dir_file = readdir(mod_dir)) != NULL) {
+		int is_dir;
+#ifdef _WIN32
+		char dir_path[strlen(MOD_DIR) + strlen(dir_file->d_name) + 1];
+		strcpy(dir_path, MOD_DIR);
+		strcat(dir_path, dir_file->d_name);
+
+		struct stat dirstats;
+		stat(dir_path, &dirstats);
+		is_dir = dirstats.st_mode & S_IFDIR;
+#else
+		is_dir = dir_file->d_type == DT_DIR;
+#endif
+		
 		// We dont want to add the . and .. directories.
-		int is_valid_dir = strcmp(dirfile->d_name, ".") && strcmp(dirfile->d_name, "..");
-		if(dirfile->d_type == DT_DIR && is_valid_dir) {
-			stringtable_add(unaccounted_mods, dirfile->d_name);
+		int is_valid_dir = strcmp(dir_file->d_name, ".") && strcmp(dir_file->d_name, "..");
+		if(is_dir && is_valid_dir) {
+			stringtable_add(unaccounted_mods, dir_file->d_name);
 		}
 	}	
 

@@ -27,6 +27,14 @@
 #include "util.h"
 #include "tmmpaths.h"
 
+#ifdef _WIN32
+#define _WIN32_WINNT 0x0600
+#include <windows.h>
+#define SYMLINK(path, link) CreateSymbolicLinkA(link, path, 0)
+#else
+#define SYMLINK(path, link) symlink(path, link)
+#endif
+
 static stringtable* st;
 
 void installer_init() {
@@ -77,7 +85,14 @@ void installer_install_mod(mod* m) {
 
 		//symlink mod file
 		mkdir_r(dirname_const(m->file_paths[i]));
-		symlink(mod_file_path, m->file_paths[i]);
+#ifdef _WIN32
+		char* p = mod_file_path;
+		while((p = strchr(p, '/')) != NULL) {
+			*p = '\\';
+		}
+#endif
+
+		printf("%i\n", SYMLINK(mod_file_path, m->file_paths[i]));
 	}
 }
 

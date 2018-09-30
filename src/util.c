@@ -25,6 +25,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef _WIN32
+#define MKDIR(path, mode) mkdir(path)
+#else
+#define MKDIR(path, mode) mkdir(path, mode)
+#endif
+
 void mkdir_r(const char* path) {
 	char tmp[256];
 	strncpy(tmp, path, sizeof(tmp));
@@ -37,12 +43,12 @@ void mkdir_r(const char* path) {
 	for(char* p = tmp + 1; *p; p++) {
 		if(*p == '/') {
 			*p = 0;
-			mkdir(tmp, 0755);
+			MKDIR(tmp, 0755);
 			*p = '/';
 		}
 	}
 
-	mkdir(tmp, 0755);
+	MKDIR(tmp, 0755);
 }
 
 void rmdir_r(const char* path) {
