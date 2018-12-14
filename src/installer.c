@@ -92,7 +92,7 @@ void installer_install_mod(mod* m) {
 		}
 #endif
 
-		printf("%i\n", SYMLINK(mod_file_path, m->file_paths[i]));
+//		printf("%i\n", SYMLINK(mod_file_path, m->file_paths[i]));
 	}
 }
 
