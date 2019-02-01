@@ -132,26 +132,26 @@ int stringtable_del(stringtable* st, const char* string) {
 	int return_code = 0;
 
 	unsigned int string_hash = fnv1a_hash(string, strlen(string)) % st->table_size;	
-	item* it = st->items[string_hash];
-
-	while(it != NULL && strcmp(it->string, string)) {
-		it = it->next;	
+	item** it = &st->items[string_hash];
+	
+	while(it != NULL && strcmp((*it)->string, string)) {
+		it = &(*it)->next;	
 	}
-
+	
 	if(it == NULL) {
 		return 1;
 	}
 
-	item* next = it->next;
-	free(it->string);
-	free(it);
+	item* next = (*it)->next;
+	free((*it)->string);
+	free(*it);
 	if(next == NULL) {
-		st->total_entries--;	
-		st->items[string_hash] = NULL;
+		*it = NULL;
 	} else {
-		st->items[string_hash] = next;
+		*it = next;
 	}
 
+	st->total_entries--;
 	return 0;
 }
 
